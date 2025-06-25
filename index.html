@@ -2,12 +2,12 @@
     <head>
         <script>
             function buildAnswersTable(answers) {
-                console.log(answers);
                 answersTable = document.getElementById('answers');
                 answers.forEach(answer => {
-                    console.log(answer);
                     const answerDiv = document.createElement("div");
+                    answerDiv.className = 'answer';
                     const answerText = document.createTextNode(answer);
+                    answerDiv.style='visibility:hidden';
                     answerDiv.appendChild(answerText);
                     answersTable.appendChild(answerDiv);
                 });
@@ -16,9 +16,39 @@
             fetch('questions/2025-06-25')
                 .then(response => response.json())
                 .then(json => buildAnswersTable(json.answers));
+
+            function submitGuess(event) {
+                form = event.target;
+                guess = form.guess.value;
+
+                if (guess.trim() != '') {
+                    answers = document.getElementsByClassName('answer');
+                    for (const answer of answers) {
+                        if (answer.textContent.toLowerCase() === guess.toLowerCase()) {
+                            answer.style = 'visibility:visible';
+                        } 
+                    }
+                }
+
+                form.guess.value = '';
+                event.preventDefault();
+            }
         </script>
+        <style>
+            #answers {
+                background-color: black;
+            }
+
+            #answers > div {
+                color: white;
+            }
+        </style>
     </head>
     <body>
         <div id="answers"></div>
+        <form onsubmit="return submitGuess(event)">
+            <input name="guess" type="text">
+            <input type="submit">
+        </form>
     </body>
 </html>
