@@ -1,6 +1,9 @@
 <html>
     <head>
+        <meta charset="UTF-8">
         <script>
+            lives = 3;
+
             function buildAnswersTable(answers) {
                 answersTable = document.getElementById('answers');
                 answers.forEach(answer => {
@@ -18,20 +21,42 @@
                 .then(json => buildAnswersTable(json.answers));
 
             function submitGuess(event) {
+                event.preventDefault();
+
                 form = event.target;
                 guess = form.guess.value;
 
-                if (guess.trim() != '') {
-                    answers = document.getElementsByClassName('answer');
-                    for (const answer of answers) {
-                        if (answer.textContent.toLowerCase() === guess.toLowerCase()) {
-                            answer.style = 'visibility:visible';
-                        } 
-                    }
-                }
+                if (guess.trim() === '') return;
 
                 form.guess.value = '';
-                event.preventDefault();
+
+                answers = document.getElementsByClassName('answer');
+
+                for (const answer of answers) {
+                    if (answer.textContent.toLowerCase() === guess.toLowerCase()) {
+                        answer.style = 'visibility:visible';
+                        return;
+                    } 
+                }
+
+                lives--;
+
+                livesElement = document.getElementById('lives');
+                
+                while (livesElement.firstChild) {
+                    livesElement.removeChild(livesElement.firstChild);
+                }
+
+                for (let i = 0; i < lives; i++) {
+                    const lifeNode = document.createElement('span');
+                    const lifeHeart = document.createTextNode('❤️');
+                    lifeNode.appendChild(lifeHeart);
+                    livesElement.appendChild(lifeNode);
+                }
+
+                if (lives === 0) {
+                    alert("Sorry, today's board beat you");
+                }
             }
         </script>
         <style>
@@ -45,6 +70,9 @@
         </style>
     </head>
     <body>
+        <div id="lives">
+            <span>❤️</span><span>❤️</span><span>❤️</span>
+        </div>
         <div id="answers"></div>
         <form onsubmit="return submitGuess(event)">
             <input name="guess" type="text">
