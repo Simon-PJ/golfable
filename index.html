@@ -1,12 +1,24 @@
 <html>
     <head>
         <script>
+            function buildAnswersTable(answers) {
+                console.log(answers);
+                answersTable = document.getElementById('answers');
+                answers.forEach(answer => {
+                    console.log(answer);
+                    const answerDiv = document.createElement("div");
+                    const answerText = document.createTextNode(answer);
+                    answerDiv.appendChild(answerText);
+                    answersTable.appendChild(answerDiv);
+                });
+            }
+
             fetch('questions/2025-06-25')
                 .then(response => response.json())
-                .then(json => console.log(json));
+                .then(json => buildAnswersTable(json.answers));
         </script>
     </head>
     <body>
-
+        <div id="answers"></div>
     </body>
 </html>
