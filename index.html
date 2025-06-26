@@ -2,6 +2,11 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Baskervville:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+
         <script>
             lives = 3;
 
@@ -86,9 +91,24 @@
                 width: 100%;
                 margin-right: 0.5rem;
             }
+
+            h1 {
+                margin-bottom: 0.5rem;
+                font-family: "Baskervville", serif;
+                font-optical-sizing: auto;
+                font-weight: 700;
+                font-style: italic;
+                text-align: center;
+            }
+
+            #lives {
+                display: flex;
+                justify-content: center;
+            }
         </style>
     </head>
     <body>
+        <h1>Golfable</h1>
         <div id="lives">
             <span>❤️</span><span>❤️</span><span>❤️</span>
         </div>
