@@ -35,6 +35,16 @@
                     buildAnswersTable(json.answers)
                 });
 
+            function revealUnguessedAnswers() {
+                answers = document.getElementsByClassName('answer');
+
+                for (const answer of answers) {
+                    if (answer.className.includes('hidden-answer')) {
+                        answer.className = 'answer unguessed-answer';
+                    }
+                }
+            }
+
             function submitGuess(event) {
                 event.preventDefault();
 
@@ -76,7 +86,7 @@
                 }
 
                 if (lives === 0) {
-                    alert("Sorry, today's board beat you");
+                    revealUnguessedAnswers();
                 }
             }
         </script>
@@ -140,6 +150,10 @@
             .hidden-answer {
                 color: transparent !important;
                 user-select: none !important;
+            }
+
+            .unguessed-answer {
+                color: red !important;
             }
         </style>
     </head>
