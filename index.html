@@ -75,6 +75,16 @@
             #answers > div {
                 color: white;
             }
+
+            #guess-form {
+                display: flex;
+                padding-top: 1rem;
+            }
+
+            #guess-box {
+                width: 100%;
+                margin-right: 0.5rem;
+            }
         </style>
     </head>
     <body>
@@ -82,8 +92,8 @@
             <span>❤️</span><span>❤️</span><span>❤️</span>
         </div>
         <div id="answers"></div>
-        <form onsubmit="return submitGuess(event)">
-            <input name="guess" type="text">
+        <form onsubmit="return submitGuess(event)" id="guess-form">
+            <input name="guess" type="text" id="guess-box">
             <input type="submit">
         </form>
     </body>
