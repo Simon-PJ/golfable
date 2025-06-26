@@ -34,7 +34,7 @@
                 answers = document.getElementsByClassName('answer');
 
                 for (const answer of answers) {
-                    if (answer.textContent.toLowerCase() === guess.toLowerCase()) {
+                    if (answer.textContent.toLowerCase() === guess.trim().toLowerCase()) {
                         answer.style = 'visibility:visible';
                         return;
                     } 
