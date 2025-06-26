@@ -26,10 +26,11 @@
                 questionField.innerText = question;
             }
 
-            fetch('questions/2025-06-25')
+            todaysDate = new Date(Date.now()).toISOString().split('T')[0];
+
+            fetch('questions/' + todaysDate)
                 .then(response => response.json())
                 .then(json => {
-                    console.log(json);
                     setQuestion(json.question);
                     buildAnswersTable(json.answers)
                 });
@@ -47,7 +48,13 @@
                 answers = document.getElementsByClassName('answer');
 
                 for (const answer of answers) {
-                    if (answer.textContent.toLowerCase() === guess.trim().toLowerCase()) {
+                    answerForUse = answer.textContent.toLowerCase().replace(/\W/g, '');
+                    guessForUse = guess.trim().toLowerCase().replace(/\W/g, '');
+
+                    answerIsIndentical = answerForUse === guessForUse;
+                    guessContainsAnswer = guessForUse.includes(answerForUse);
+
+                    if (answerIsIndentical || guessContainsAnswer) {
                         answer.className = 'answer';
                         return;
                     } 
@@ -144,7 +151,7 @@
         </div>
         <div id="answers"></div>
         <form onsubmit="return submitGuess(event)" id="guess-form">
-            <input name="guess" type="text" id="guess-box" autofocus>
+            <input name="guess" type="text" id="guess-box">
             <input type="submit">
         </form>
     </body>
