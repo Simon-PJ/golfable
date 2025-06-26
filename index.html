@@ -22,9 +22,18 @@
                 });
             }
 
+            function setQuestion(question) {
+                questionField = document.getElementById('question');
+                questionField.innerText = question;
+            }
+
             fetch('questions/2025-06-25')
                 .then(response => response.json())
-                .then(json => buildAnswersTable(json.answers));
+                .then(json => {
+                    console.log(json);
+                    setQuestion(json.question);
+                    buildAnswersTable(json.answers)
+                });
 
             function submitGuess(event) {
                 event.preventDefault();
@@ -105,10 +114,19 @@
                 display: flex;
                 justify-content: center;
             }
+
+            #question {
+                font-family: "Baskervville", serif;
+                font-optical-sizing: auto;
+                font-weight: 300;
+                text-align: center;
+                margin-bottom: 0.5rem;
+            }
         </style>
     </head>
     <body>
         <h1>Golfable</h1>
+        <div id="question"></div>
         <div id="lives">
             <span>❤️</span><span>❤️</span><span>❤️</span>
         </div>
