@@ -11,4 +11,3 @@ Serve the files by running the following in the root of the repo:
 - Accept surnames for players (maybe tied to the above)
 - Keep a streak count
 - Track that you've already played today
-- Number answers

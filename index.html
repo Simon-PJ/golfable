@@ -6,16 +6,24 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Baskervville:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=News+Cycle:wght@400;700&display=swap" rel="stylesheet">
 
         <script>
             lives = 3;
 
             function buildAnswersTable(answers) {
                 answersTable = document.getElementById('answers');
-                answers.forEach(answer => {
+                answers.forEach((answer, i) => {
                     const answerDiv = document.createElement("div");
-                    answerDiv.className = 'answer hidden-answer';
-                    const answerText = document.createTextNode(answer);
+                    answerDiv.className = 'answer';
+                    const answerNumber = document.createElement("span");
+                    answerNumber.classList = 'answer-number';
+                    answerNumber.textContent = i;
+                    const answerText = document.createElement("span")
+                    answerText.className = 'answer-text';
+                    answerText.hidden = true;
+                    answerText.textContent = answer;
+                    answerDiv.appendChild(answerNumber);
                     answerDiv.appendChild(answerText);
                     answersTable.appendChild(answerDiv);
                 });
@@ -36,11 +44,12 @@
                 });
 
             function revealUnguessedAnswers() {
-                answers = document.getElementsByClassName('answer');
+                answers = document.getElementsByClassName('answer-text');
 
                 for (const answer of answers) {
-                    if (answer.className.includes('hidden-answer')) {
-                        answer.className = 'answer unguessed-answer';
+                    if (answer.hidden) {
+                        answer.hidden = false;
+                        answer.className = "answer-text unguessed-answer";
                     }
                 }
             }
@@ -55,7 +64,7 @@
 
                 form.guess.value = '';
 
-                answers = document.getElementsByClassName('answer');
+                answers = document.getElementsByClassName('answer-text');
 
                 for (const answer of answers) {
                     answerForUse = answer.textContent.toLowerCase().replace(/\W/g, '');
@@ -65,7 +74,8 @@
                     guessContainsAnswer = guessForUse.includes(answerForUse);
 
                     if (answerIsIndentical || guessContainsAnswer) {
-                        answer.className = 'answer';
+                        answer.hidden = false;
+                        answer.className = 'answer answer-text-visible';
                         return;
                     } 
                 }
@@ -152,8 +162,34 @@
                 user-select: none !important;
             }
 
+            .answer {
+                display: flex;
+            }
+
             .unguessed-answer {
                 color: red !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .answer-number {
+                margin-right: 2rem;
+                margin-left: 0.5rem;
+                font-family: "News Cycle", sans-serif;
+                font-weight: 700;
+                font-style: normal;
+                color: red;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 1rem;
+            }
+
+            .answer-text-visible {
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
         </style>
     </head>
