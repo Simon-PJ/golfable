@@ -11,22 +11,46 @@
         <script>
             lives = 3;
 
+            function getTodaysSubmission() {
+                guesses = localStorage.getItem('golfable-' + todaysDate);
+                if (!guesses) {
+                    guesses = [];
+                } else {
+                    guesses = guesses.split(',');
+                }
+                return guesses;
+            }
+
+            function alreadyGuessedToday() {
+                return !!localStorage.getItem('golfable-' + todaysDate);
+            }
+
             function buildAnswersTable(answers) {
                 answersTable = document.getElementById('answers');
+                submission = getTodaysSubmission();
+
                 answers.forEach((answer, i) => {
+                    answerHasBeenGuessed = submission.includes(i.toString());
+
                     const answerDiv = document.createElement("div");
                     answerDiv.className = 'answer';
                     const answerNumber = document.createElement("span");
                     answerNumber.classList = 'answer-number';
                     answerNumber.textContent = i + 1;
                     const answerText = document.createElement("span")
-                    answerText.className = 'answer-text';
-                    answerText.hidden = true;
+                    answerText.className = answerHasBeenGuessed ? 'answer-text answer-text-visible' : 'answer-text';
+                    answerText.hidden = !answerHasBeenGuessed;
                     answerText.textContent = answer;
                     answerDiv.appendChild(answerNumber);
                     answerDiv.appendChild(answerText);
                     answersTable.appendChild(answerDiv);
                 });
+
+                if (alreadyGuessedToday()) {
+                    revealUnguessedAnswers();
+                    lives = 0;
+                    document.getElementById('lives').remove();
+                }
             }
 
             function setQuestion(question) {
@@ -72,7 +96,7 @@
                 form = event.target;
                 guess = form.guess.value;
 
-                if (guess.trim() === '') return;
+                if (lives <= 0 || guess.trim() === '') return;
 
                 form.guess.value = '';
 
@@ -87,7 +111,7 @@
 
                     if (answerIsIndentical || guessContainsAnswer) {
                         answer.hidden = false;
-                        answer.className = 'answer answer-text-visible';
+                        answer.className = 'answer-text answer-text-visible';
 
                         checkForGameEnd();
 
@@ -128,6 +152,23 @@
                 gameEnd();
             }
 
+            function saveTodaysGuesses() {
+                i = 0;
+                correctAnswers = [];
+                answers = document.getElementsByClassName('answer-text');
+                
+                for (const answer of answers) {
+                    if (!answer.className.includes('unguessed-answer')) {
+                        correctAnswers.push(i);
+                    }
+
+                    i++;
+                }
+
+                toSave = correctAnswers.join(",");
+                localStorage.setItem('golfable-' + todaysDate, toSave);
+            }
+
             function gameEnd() {
                 currentStreak = localStorage.getItem('golfable-streak');
 
@@ -137,6 +178,8 @@
  
                 localStorage.setItem('golfable-streak', parseInt(currentStreak) + 1);
                 getStreak();
+
+                saveTodaysGuesses();
             }
         </script>
         <style>
