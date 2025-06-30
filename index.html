@@ -43,6 +43,18 @@
                     buildAnswersTable(json.answers)
                 });
 
+            function getStreak() {
+                streak = localStorage.getItem("golfable-streak");
+
+                if (streak) {
+                    streakField = document.getElementById("streak");
+                    streakField.textContent = "🔥 " + streak;
+                    streakField.className = "streak";
+                }
+            }
+
+            setTimeout(() => getStreak(), 0);
+
             function revealUnguessedAnswers() {
                 answers = document.getElementsByClassName('answer-text');
 
@@ -76,6 +88,9 @@
                     if (answerIsIndentical || guessContainsAnswer) {
                         answer.hidden = false;
                         answer.className = 'answer answer-text-visible';
+
+                        checkForGameEnd();
+
                         return;
                     } 
                 }
@@ -97,7 +112,31 @@
 
                 if (lives === 0) {
                     revealUnguessedAnswers();
+                    gameEnd();
                 }
+            }
+
+            function checkForGameEnd() {
+                answers = document.getElementsByClassName('answer-text');
+
+                for (const answer of answers) {
+                    if (answer.hidden) {
+                        return;
+                    }
+                }
+                
+                gameEnd();
+            }
+
+            function gameEnd() {
+                currentStreak = localStorage.getItem('golfable-streak');
+
+                if (!currentStreak) {
+                    currentStreak = 0;
+                }
+ 
+                localStorage.setItem('golfable-streak', parseInt(currentStreak) + 1);
+                getStreak();
             }
         </script>
         <style>
@@ -191,9 +230,23 @@
                 align-items: center;
                 justify-content: center;
             }
+
+            .streak {
+                position: fixed;
+                font-family: "News Cycle", sans-serif;
+                font-weight: 700;
+                font-size: 24px;
+                right: 20px;
+            }
+
+            .zero-streak {
+                filter: grayscale(100%);
+                color: grey;
+            }
         </style>
     </head>
     <body>
+        <div id="streak" class="streak zero-streak">🔥 0</div>
         <h1>Golfable</h1>
         <div id="question"></div>
         <div id="lives">

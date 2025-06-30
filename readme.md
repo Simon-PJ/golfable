@@ -9,5 +9,6 @@ Serve the files by running the following in the root of the repo:
 - Isn't obvious that you have 3 lives
 - Accept certain mispellings (could have a variety of alternatively accepted answers)
 - Accept surnames for players (maybe tied to the above)
-- Keep a streak count
 - Track that you've already played today
+    - Stop streak count being bumped multiple days
+- Add share to functionality
