@@ -8,180 +8,6 @@
         <link href="https://fonts.googleapis.com/css2?family=Baskervville:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=News+Cycle:wght@400;700&display=swap" rel="stylesheet">
 
-        <script>
-            lives = 3;
-
-            function getTodaysSubmission() {
-                guesses = localStorage.getItem('golfable-' + todaysDate);
-                if (!guesses) {
-                    guesses = [];
-                } else {
-                    guesses = guesses.split(',');
-                }
-                return guesses;
-            }
-
-            function alreadyGuessedToday() {
-                return !!localStorage.getItem('golfable-' + todaysDate);
-            }
-
-            function buildAnswersTable(answers) {
-                answersTable = document.getElementById('answers');
-                submission = getTodaysSubmission();
-
-                answers.forEach((answer, i) => {
-                    answerHasBeenGuessed = submission.includes(i.toString());
-
-                    const answerDiv = document.createElement("div");
-                    answerDiv.className = 'answer';
-                    const answerNumber = document.createElement("span");
-                    answerNumber.classList = 'answer-number';
-                    answerNumber.textContent = i + 1;
-                    const answerText = document.createElement("span")
-                    answerText.className = answerHasBeenGuessed ? 'answer-text answer-text-visible' : 'answer-text';
-                    answerText.hidden = !answerHasBeenGuessed;
-                    answerText.textContent = answer;
-                    answerDiv.appendChild(answerNumber);
-                    answerDiv.appendChild(answerText);
-                    answersTable.appendChild(answerDiv);
-                });
-
-                if (alreadyGuessedToday()) {
-                    revealUnguessedAnswers();
-                    lives = 0;
-                    document.getElementById('lives').remove();
-                }
-            }
-
-            function setQuestion(question) {
-                questionField = document.getElementById('question');
-                questionField.innerText = question;
-            }
-
-            todaysDate = new Date(Date.now()).toISOString().split('T')[0];
-
-            fetch('questions/' + todaysDate)
-                .then(response => response.json())
-                .then(json => {
-                    setQuestion(json.question);
-                    buildAnswersTable(json.answers)
-                });
-
-            function getStreak() {
-                streak = localStorage.getItem("golfable-streak");
-
-                if (streak) {
-                    streakField = document.getElementById("streak");
-                    streakField.textContent = "🔥 " + streak;
-                    streakField.className = "streak";
-                }
-            }
-
-            setTimeout(() => getStreak(), 0);
-
-            function revealUnguessedAnswers() {
-                answers = document.getElementsByClassName('answer-text');
-
-                for (const answer of answers) {
-                    if (answer.hidden) {
-                        answer.hidden = false;
-                        answer.className = "answer-text unguessed-answer";
-                    }
-                }
-            }
-
-            function submitGuess(event) {
-                event.preventDefault();
-
-                form = event.target;
-                guess = form.guess.value;
-
-                if (lives <= 0 || guess.trim() === '') return;
-
-                form.guess.value = '';
-
-                answers = document.getElementsByClassName('answer-text');
-
-                for (const answer of answers) {
-                    answerForUse = answer.textContent.toLowerCase().replace(/\W/g, '');
-                    guessForUse = guess.trim().toLowerCase().replace(/\W/g, '');
-
-                    answerIsIndentical = answerForUse === guessForUse;
-                    guessContainsAnswer = guessForUse.includes(answerForUse);
-
-                    if (answerIsIndentical || guessContainsAnswer) {
-                        answer.hidden = false;
-                        answer.className = 'answer-text answer-text-visible';
-
-                        checkForGameEnd();
-
-                        return;
-                    } 
-                }
-
-                lives--;
-
-                livesElement = document.getElementById('lives');
-                
-                while (livesElement.firstChild) {
-                    livesElement.removeChild(livesElement.firstChild);
-                }
-
-                for (let i = 0; i < lives; i++) {
-                    const lifeNode = document.createElement('span');
-                    const lifeHeart = document.createTextNode('❤️');
-                    lifeNode.appendChild(lifeHeart);
-                    livesElement.appendChild(lifeNode);
-                }
-
-                if (lives === 0) {
-                    revealUnguessedAnswers();
-                    gameEnd();
-                }
-            }
-
-            function checkForGameEnd() {
-                answers = document.getElementsByClassName('answer-text');
-
-                for (const answer of answers) {
-                    if (answer.hidden) {
-                        return;
-                    }
-                }
-                
-                gameEnd();
-            }
-
-            function saveTodaysGuesses() {
-                i = 0;
-                correctAnswers = [];
-                answers = document.getElementsByClassName('answer-text');
-                
-                for (const answer of answers) {
-                    if (!answer.className.includes('unguessed-answer')) {
-                        correctAnswers.push(i);
-                    }
-
-                    i++;
-                }
-
-                toSave = correctAnswers.join(",");
-                localStorage.setItem('golfable-' + todaysDate, toSave);
-            }
-
-            function gameEnd() {
-                currentStreak = localStorage.getItem('golfable-streak');
-
-                if (!currentStreak) {
-                    currentStreak = 0;
-                }
- 
-                localStorage.setItem('golfable-streak', parseInt(currentStreak) + 1);
-                getStreak();
-
-                saveTodaysGuesses();
-            }
-        </script>
         <style>
             html {
                 min-width: 100px;
@@ -286,6 +112,30 @@
                 filter: grayscale(100%);
                 color: grey;
             }
+
+            #end-popup {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                border: 1px solid black;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #ffdf00;
+                padding: 5rem;
+                visibility: hidden;
+            }
+
+            #end-popup-text {
+                margin-bottom: 5rem;
+            }
+
+            #close-end-popup {
+                position: fixed;
+                top: 0.8rem;
+                right: 1rem;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
@@ -300,6 +150,202 @@
             <input name="guess" type="text" id="guess-box">
             <input type="submit" value="Submit Answer">
         </form>
+
+        <div id="end-popup">
+            <button onclick="closeEndPopup()" id="close-end-popup">x</button>
+            <div id="end-popup-text"></div>
+            <div>Come back tomorrow for another question set</div>
+        </div>
+
+        <script>
+            lives = 3;
+
+            function getTodaysSubmission() {
+                guesses = localStorage.getItem('golfable-' + todaysDate);
+                if (!guesses) {
+                    guesses = [];
+                } else {
+                    guesses = guesses.split(',');
+                }
+                return guesses;
+            }
+
+            function alreadyGuessedToday() {
+                return !!localStorage.getItem('golfable-' + todaysDate);
+            }
+
+            function buildAnswersTable(answers) {
+                answersTable = document.getElementById('answers');
+                submission = getTodaysSubmission();
+
+                answers.forEach((answer, i) => {
+                    answerHasBeenGuessed = submission.includes(i.toString());
+
+                    const answerDiv = document.createElement("div");
+                    answerDiv.className = 'answer';
+                    const answerNumber = document.createElement("span");
+                    answerNumber.classList = 'answer-number';
+                    answerNumber.textContent = i + 1;
+                    const answerText = document.createElement("span")
+                    answerText.className = answerHasBeenGuessed ? 'answer-text answer-text-visible' : 'answer-text';
+                    answerText.hidden = !answerHasBeenGuessed;
+                    answerText.textContent = answer;
+                    answerDiv.appendChild(answerNumber);
+                    answerDiv.appendChild(answerText);
+                    answersTable.appendChild(answerDiv);
+                });
+
+                if (alreadyGuessedToday()) {
+                    revealUnguessedAnswers();
+                    lives = 0;
+                    document.getElementById('lives').remove();
+                    showEndPopup();
+                }
+            }
+
+            function setQuestion(question) {
+                questionField = document.getElementById('question');
+                questionField.innerText = question;
+            }
+
+            todaysDate = new Date(Date.now()).toISOString().split('T')[0];
+
+            fetch('questions/' + todaysDate)
+                .then(response => response.json())
+                .then(json => {
+                    setQuestion(json.question);
+                    buildAnswersTable(json.answers)
+                });
+
+            function getStreak() {
+                streak = localStorage.getItem("golfable-streak");
+
+                if (streak) {
+                    streakField = document.getElementById("streak");
+                    streakField.textContent = "🔥 " + streak;
+                    streakField.className = "streak";
+                }
+            }
+
+            setTimeout(() => getStreak(), 0);
+
+            function revealUnguessedAnswers() {
+                answers = document.getElementsByClassName('answer-text');
+
+                for (const answer of answers) {
+                    if (answer.hidden) {
+                        answer.hidden = false;
+                        answer.className = "answer-text unguessed-answer";
+                    }
+                }
+            }
+
+            function submitGuess(event) {
+                event.preventDefault();
+
+                form = event.target;
+                guess = form.guess.value;
+
+                if (lives <= 0 || guess.trim() === '') return;
+
+                form.guess.value = '';
+
+                answers = document.getElementsByClassName('answer-text');
+
+                for (const answer of answers) {
+                    answerForUse = answer.textContent.toLowerCase().replace(/\W/g, '');
+                    guessForUse = guess.trim().toLowerCase().replace(/\W/g, '');
+
+                    answerIsIndentical = answerForUse === guessForUse;
+                    guessContainsAnswer = guessForUse.includes(answerForUse);
+
+                    if (answerIsIndentical || guessContainsAnswer) {
+                        answer.hidden = false;
+                        answer.className = 'answer-text answer-text-visible';
+
+                        checkForGameEnd();
+
+                        return;
+                    } 
+                }
+
+                lives--;
+
+                livesElement = document.getElementById('lives');
+                
+                while (livesElement.firstChild) {
+                    livesElement.removeChild(livesElement.firstChild);
+                }
+
+                for (let i = 0; i < lives; i++) {
+                    const lifeNode = document.createElement('span');
+                    const lifeHeart = document.createTextNode('❤️');
+                    lifeNode.appendChild(lifeHeart);
+                    livesElement.appendChild(lifeNode);
+                }
+
+                if (lives === 0) {
+                    revealUnguessedAnswers();
+                    gameEnd();
+                }
+            }
+
+            function checkForGameEnd() {
+                answers = document.getElementsByClassName('answer-text');
+
+                for (const answer of answers) {
+                    if (answer.hidden) {
+                        return;
+                    }
+                }
+                
+                gameEnd();
+            }
+
+            function saveTodaysGuesses() {
+                i = 0;
+                correctAnswers = [-1];
+                answers = document.getElementsByClassName('answer-text');
+                
+                for (const answer of answers) {
+                    if (!answer.className.includes('unguessed-answer')) {
+                        correctAnswers.push(i);
+                    }
+
+                    i++;
+                }
+
+                toSave = correctAnswers.join(",");
+                localStorage.setItem('golfable-' + todaysDate, toSave);
+            }
+
+            function gameEnd() {
+                currentStreak = localStorage.getItem('golfable-streak');
+
+                if (!currentStreak) {
+                    currentStreak = 0;
+                }
+ 
+                localStorage.setItem('golfable-streak', parseInt(currentStreak) + 1);
+                getStreak();
+
+                saveTodaysGuesses();
+                showEndPopup();
+            }
+
+            function showEndPopup() {
+                correctAnswers = 0;
+                endText = document.getElementById('end-popup-text');
+                endText.innerText = "Well done on today's question. You got " + correctAnswers + "/10.";
+
+                endPopup = document.getElementById('end-popup');
+                endPopup.style.visibility = 'visible';
+            }
+
+            function closeEndPopup() {
+                document.getElementById('end-popup').style.visibility = 'hidden';
+            }
+        </script>
 
         <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "644aed7f27b64c85ac6ce1c6f3b2f426"}'></script><!-- End Cloudflare Web Analytics -->
     </body>
